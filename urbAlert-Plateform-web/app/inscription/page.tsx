@@ -1,63 +1,100 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { AlertCircle, Check, Loader2 } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import Link from "next/link"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AlertCircle, Check, Loader2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signInWithGoogle, registerUser } from "@/lib/api/auth";
 
 export default function InscriptionPage() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState(false)
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
     nom: "",
     email: "",
     telephone: "",
     motDePasse: "",
     confirmMotDePasse: "",
-  })
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
-    // Validation basique
+    // Basic validation
     if (formData.motDePasse !== formData.confirmMotDePasse) {
-      setError("Les mots de passe ne correspondent pas")
-      setIsLoading(false)
-      return
+      setError("Les mots de passe ne correspondent pas");
+      setIsLoading(false);
+      return;
     }
 
     if (formData.motDePasse.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caractères")
-      setIsLoading(false)
-      return
+      setError("Le mot de passe doit contenir au moins 8 caractères");
+      setIsLoading(false);
+      return;
     }
 
-    // Simulation d'une requête API
     try {
-      // Ici, vous implémenteriez l'appel à votre API d'inscription
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      setSuccess(true)
-    } catch (err) {
-      setError("Une erreur est survenue lors de l'inscription")
+      // Register user with Firebase
+      await registerUser(formData.email, formData.motDePasse, formData.nom);
+      setSuccess(true);
+    } catch (err: any) {
+      // Handle Firebase-specific errors
+      if (err.code === "auth/email-already-in-use") {
+        setError("Cette adresse email est déjà utilisée");
+      } else if (err.code === "auth/invalid-email") {
+        setError("Adresse email invalide");
+      } else if (err.code === "auth/weak-password") {
+        setError("Le mot de passe est trop faible");
+      } else {
+        setError(
+          "Une erreur est survenue lors de l'inscription: " +
+            (err.message || "Erreur inconnue")
+        );
+      }
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    setError("");
+
+    try {
+      await signInWithGoogle();
+      router.push("/tableau-de-bord");
+    } catch (err: any) {
+      setError(
+        "Erreur de connexion avec Google: " + (err.message || "Erreur inconnue")
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="container flex items-center justify-center py-10 md:py-20">
@@ -65,7 +102,8 @@ export default function InscriptionPage() {
         <CardHeader>
           <CardTitle>Créer un compte</CardTitle>
           <CardDescription>
-            Rejoignez notre communauté pour signaler et consulter les problèmes urbains en Guinée
+            Rejoignez notre communauté pour signaler et consulter les problèmes
+            urbains en Guinée
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -83,8 +121,8 @@ export default function InscriptionPage() {
               </div>
               <h3 className="text-xl font-semibold">Inscription réussie!</h3>
               <p className="text-center text-muted-foreground">
-                Un email de confirmation a été envoyé à votre adresse. Veuillez cliquer sur le lien pour activer votre
-                compte.
+                Un email de confirmation a été envoyé à votre adresse. Veuillez
+                cliquer sur le lien pour activer votre compte.
               </p>
               <Button asChild className="mt-2 w-full">
                 <Link href="/connexion">Aller à la page de connexion</Link>
@@ -144,7 +182,9 @@ export default function InscriptionPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirmMotDePasse">Confirmer le mot de passe</Label>
+                    <Label htmlFor="confirmMotDePasse">
+                      Confirmer le mot de passe
+                    </Label>
                     <Input
                       id="confirmMotDePasse"
                       name="confirmMotDePasse"
@@ -157,7 +197,8 @@ export default function InscriptionPage() {
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Inscription en cours...
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                        Inscription en cours...
                       </>
                     ) : (
                       "S'inscrire"
@@ -167,10 +208,22 @@ export default function InscriptionPage() {
               </TabsContent>
               <TabsContent value="oauth">
                 <div className="flex flex-col space-y-4 pt-4">
-                  <Button variant="outline" className="w-full">
-                    Continuer avec Google
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleGoogleSignIn}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                        Connexion en cours...
+                      </>
+                    ) : (
+                      "Continuer avec Google"
+                    )}
                   </Button>
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full" disabled={true}>
                     Continuer avec Facebook
                   </Button>
                 </div>
@@ -188,5 +241,5 @@ export default function InscriptionPage() {
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
