@@ -5,6 +5,7 @@ Une plateforme de signalement et de navigation urbaine pour améliorer la gestio
 ## 📋 À propos
 
 UrbanAlert est une application web et mobile qui permet aux citoyens et aux touristes de signaler en temps réel les problèmes d'infrastructure urbaine en Guinée, tels que :
+
 - Routes endommagées
 - Coupures électriques
 - Dépôts de déchets non collectés
@@ -19,6 +20,7 @@ UrbanAlert est une application web et mobile qui permet aux citoyens et aux tour
 ## 🛠 Technologies utilisées
 
 ### Frontend
+
 - Next.js 15
 - React 19
 - Tailwind CSS
@@ -27,6 +29,7 @@ UrbanAlert est une application web et mobile qui permet aux citoyens et aux tour
 - TypeScript
 
 ### Backend
+
 - Next.js
 - Firebase Auth
 - Firebase Storage
@@ -35,19 +38,16 @@ UrbanAlert est une application web et mobile qui permet aux citoyens et aux tour
 ## 📦 Installation
 
 1. Clonez le dépôt :
+
 ```bash
 git clone https://github.com/votre-username/urbalert.git
 ```
 
 2. Installez les dépendances du frontend :
+
 ```bash
 cd urbAlert-Plateform-web
 npm install --legacy-peer-deps
-```
-
-3. Configurez les variables d'environnement :
-```bash
-cp .env.example .env.local
 ```
 
 ## 🚀 Démarrage
@@ -56,6 +56,7 @@ cp .env.example .env.local
 cd urbAlert-Plateform-web
 npm run dev
 ```
+
 L'application sera accessible sur `http://localhost:3000`
 
 ## 📱 Structure du projet
